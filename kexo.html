@@ -1,0 +1,883 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kexoexchange - simulateur</title>
+
+ <style>
+    /* AJOUT IMPORTANT POUR LA STABILITÉ DE LA MISE EN PAGE */
+    * {
+        box-sizing: border-box; 
+    }
+
+    /* Variables CSS pour un thème Clair et Professionnel */
+    :root {
+        --primary-color: #007bff; 
+        --kexo-color: #f7a048; 
+        --background-color: #f8f9fa; 
+        --card-color: #ffffff; 
+        --text-color: #212529; 
+        --border-color: #ced4da; 
+        --success-color: #28a745; 
+        --shadow-color: rgba(0, 0, 0, 0.1); 
+        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* --- CORRECTION ESSENTIELLE POUR GOOGLE TRANSLATE --- */
+    body {
+        font-family: var(--font-family);
+        background-color: var(--background-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center; 
+        min-height: 100vh;
+        /* GARDE-FOU PRINCIPAL POUR ÉVITER LE DÉFILEMENT HORIZONTAL */
+        overflow-x: hidden; 
+        /* GESTION DE L'ESPACE AJOUTÉ PAR GOOGLE TRANSLATE */
+        top: 0 !important; 
+    }
+    html {
+         /* GESTION DE L'ESPACE AJOUTÉ PAR GOOGLE TRANSLATE */
+        margin-top: 0 !important; 
+    }
+    /* FIN CORRECTION GOOGLE TRANSLATE */
+
+
+    /* En-tête doit toujours prendre 100% */
+    .global-header {
+        width: 100%;
+        min-width: 100%; 
+        background-color: var(--card-color); 
+        border-bottom: 1px solid #e9ecef;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        padding: 10px 20px; 
+        box-sizing: border-box;
+    }
+    
+    /* NOUVEAU CONTENEUR pour aligner titre et traduction */
+    .language-and-title-container {
+        display: flex;
+        justify-content: space-between; /* Espace entre le titre et le sélecteur de langue */
+        align-items: center;
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 1.2em;
+        font-weight: 700;
+        margin: 0; 
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--primary-color); 
+        background: linear-gradient(90deg, var(--primary-color) 0%, var(--kexo-color) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-fill-color: transparent;
+        display: inline-block;
+    }
+    
+    /* Style du sélecteur de langue */
+    .language-selector {
+        position: relative;
+        cursor: pointer;
+        font-size: 0.9em;
+        font-weight: 600;
+        color: var(--primary-color);
+        padding: 5px 10px;
+        border-radius: 5px;
+        background-color: #f0f0f0;
+        transition: background-color 0.2s;
+        /* Correction pour éviter que le conteneur ne crée un décalage */
+        line-height: 1.2; 
+    }
+    
+    .language-selector:hover {
+        background-color: #e0e0e0;
+    }
+
+    .language-selector span {
+        margin-left: 5px;
+    }
+    
+    /* Conteneur du widget Google Translate (Celui qui est invisible) */
+    #custom-lang {
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        width: 100%; 
+        height: 100%; 
+        opacity: 0; 
+        z-index: 999;
+    }
+
+    /* Conteneur principal - Centrage strict */
+    .main-content {
+        width: 100%;  
+        max-width: 900px; 
+        margin: 0 auto; 
+        padding: 30px 0; 
+        flex-grow: 1;
+    }
+
+    .logo-container {
+        text-align: center;
+        margin-bottom: 20px; 
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e9ecef; 
+    }
+
+    #kexo-logo {
+        width: 70px; 
+        height: 70px;
+        border-radius: 50%;
+        object-fit: contain;
+    }
+
+    .swap-form-card {
+        background-color: var(--card-color); 
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px var(--shadow-color);
+        margin: 0 auto 50px auto;
+        width: 95%; 
+        max-width: 480px; 
+        border: 1px solid var(--border-color);
+    }
+    
+    .description-section {
+        width: 95%; 
+        max-width: 800px; 
+        margin: 30px auto; 
+        padding: 20px;
+        text-align: justify;
+        line-height: 1.7;
+    }
+
+    .description-section h2 {
+        text-align: center;
+        color: var(--primary-color);
+        margin-bottom: 25px;
+        font-size: 1.5em;
+    }
+    
+    /* Styles des Inputs/Boutons (Standard) */
+    
+    .input-group {
+        margin-bottom: 25px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    input, select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background-color: #ffffff; 
+        color: var(--text-color);
+        box-sizing: border-box; 
+        font-size: 1.05em;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        -webkit-appearance: none; 
+        -moz-appearance: none;
+        appearance: none;
+    }
+
+    input:focus, select:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+    }
+
+    #crypto-to {
+        background-color: #fff3cd; 
+        font-weight: bold;
+        border-color: var(--kexo-color);
+    }
+
+    /* Style général des boutons */
+    button {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s, opacity 0.3s;
+    }
+
+    #swap-button {
+        background-color: var(--kexo-color);
+        color: white; 
+        margin-top: 30px;
+    }
+
+    #swap-button:hover:not(:disabled) {
+        background-color: #e68e37;
+    }
+
+    #swap-button:disabled {
+        background-color: #d1d1d1;
+        color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.8;
+    }
+
+    .result-box {
+        background-color: #e2f0fb; 
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 5px solid var(--primary-color);
+        margin-top: 15px;
+    }
+
+    .result-box p {
+        margin: 5px 0;
+        font-size: 1em;
+    }
+
+    .result-box span {
+        font-weight: bold;
+        color: var(--success-color);
+    }
+
+    .disclaimer {
+        text-align: center;
+        margin-top: 30px;
+        font-size: 0.85em;
+        color: #6c757d;
+    }
+
+    select {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"><path fill="%23212529" d="M7 10l5 5 5-5z"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 15px top 50%;
+        background-size: 18px 18px;
+        padding-right: 40px; 
+    }
+
+    /* --- MODALES GÉNÉRALES --- */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); 
+        display: none; 
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background-color: var(--card-color);
+        padding: 30px;
+        border-radius: 16px; 
+        max-width: 450px; 
+        width: 90%;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        position: relative;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 2em;
+        font-weight: 300; 
+        cursor: pointer;
+        color: #adb5bd;
+        transition: color 0.2s;
+    }
+    .modal-close:hover {
+        color: var(--text-color);
+    }
+    
+    /* Styles spécifiques à la modale de Paiement */
+    .exchange-summary p {
+        font-size: 1.1em;
+        margin: 8px 0;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .payment-info {
+        background-color: var(--card-color); 
+        border: 2px solid var(--kexo-color); 
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 25px;
+        text-align: center;
+    }
+    
+    .address-container {
+        position: relative; 
+        background-color: #e9ecef;
+        border-radius: 6px;
+        margin: 10px 0;
+        border: 1px solid #d1d1d1;
+        padding: 10px 10px 10px 12px; 
+        overflow: hidden; 
+    }
+
+    .btc-address {
+        text-align: left;
+        font-family: monospace;
+        white-space: nowrap; 
+        overflow: hidden;
+        text-overflow: ellipsis; 
+        font-size: 1em;
+        font-weight: 500;
+        color: var(--text-color);
+        padding-right: 40px; 
+        display: block;
+    }
+
+    .copy-button {
+        position: absolute; 
+        top: 50%;
+        right: 1px; 
+        transform: translateY(-50%);
+        width: auto; 
+        padding: 5px 8px; 
+        font-size: 1.2em; 
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 0 6px 6px 0; 
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .copy-button:hover {
+        background-color: #0056b3;
+    }
+
+    #confirm-payment-button {
+        margin-top: 30px;
+        background-color: var(--success-color); 
+        color: white;
+        font-size: 1.1em;
+    }
+    #confirm-payment-button:hover {
+        background-color: #218838;
+    }
+
+    /* --- MODALE DE CHARGEMENT --- */
+    #loading-modal .modal-content {
+        max-width: 300px;
+        padding: 40px 20px;
+        text-align: center;
+    }
+    
+    .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-top: 4px solid var(--kexo-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* --- MODALE DE SUCCÈS / EN COURS --- */
+    #success-modal .modal-content {
+        max-width: 400px;
+        padding: 40px 30px;
+        text-align: center;
+        /* MIS À JOUR : Bordure KEXO pour l'état "en cours de traitement" */
+        border: 3px solid var(--kexo-color); 
+    }
+    
+    .success-icon {
+        /* MIS À JOUR : Couleur KEXO pour l'état "en cours de traitement" */
+        color: var(--kexo-color); 
+        font-size: 4em;
+        margin-bottom: 15px;
+        display: block;
+        line-height: 1;
+        /* Animation de pop */
+        animation: successPop 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+    
+    @keyframes successPop {
+        0% { transform: scale(0); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* --- MEDIA QUERIES (RESPONSIVE DESIGN) --- */
+
+    @media (max-width: 768px) {
+        .global-header {
+            padding: 10px 15px;
+        }
+        
+        .main-content {
+            padding: 20px 0; 
+            margin: 0; 
+            width: 100%;
+        }
+
+        .swap-form-card {
+            padding: 25px; 
+            margin: 0 auto 30px auto; 
+            width: 100%; 
+            max-width: none; 
+        }
+        
+        .description-section {
+            width: 100%;
+            padding: 20px; 
+            margin: 20px auto;
+        }
+
+        h1 {
+            font-size: 1.1em;
+        }
+        .modal-content {
+            padding: 20px; 
+            width: 95%; 
+        }
+        .btc-address {
+            font-size: 0.9em;
+            padding-right: 35px; 
+        }
+        .copy-button {
+            padding: 4px 7px;
+            font-size: 1.1em;
+        }
+        
+        .language-selector {
+            font-size: 0.8em;
+            padding: 3px 8px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .swap-form-card, .modal-content {
+            border-radius: 8px; 
+        }
+        
+        .swap-form-card {
+             padding: 20px;
+             margin-left: 0; 
+             margin-right: 0; 
+        }
+        
+        .modal-content {
+            padding: 15px;
+        }
+
+        .btc-address {
+            font-size: 0.85em; 
+            padding-right: 30px;
+        }
+    }
+
+
+/* Masquer et réinitialiser les styles du widget Google Translate */
+
+/* Cible les principaux éléments créés par Google Translate (pour l'espacement) */
+body > .skiptranslate,
+body > .skiptranslate.goog-te-spinner-pos,
+.goog-text-area,
+.goog-tooltip, .goog-tooltip:hover,
+.goog-text-highlight {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  top: 0 !important;
+  padding-bottom: 0 !important; 
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* IMPORTANT : Masquer le sélecteur d'origine pour ne montrer que le sélecteur custom */
+.goog-te-gadget-simple {
+    display: none !important; 
+}
+
+/* NOUVELLES RÈGLES pour cibler le conteneur du widget (ce qui cause souvent le décalage) */
+#google_translate_element {
+    /* Assure qu'il est absolument masqué */
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+</style>
+
+
+</head>
+<body>
+    
+    <div class="global-header">
+        
+        <div class="language-and-title-container">
+            
+            <h1>kexoexchange</h1>
+            
+            <div class="language-selector">
+                <span style="font-size: 1.1em;">🌐</span>
+                <span>Langue</span>
+                <div id="custom-lang">
+                    <div id="google_translate_element"></div>
+                </div>
+            </div>
+            
+        </div>
+        </div>
+
+    <div class="main-content">
+        
+        <div class="swap-form-card">
+            
+            <div class="logo-container">
+                <img style="width:100%;" id="kexo-logo" src="image/coin.png" alt="logo kexocoin">
+            </div>
+            
+            <form id="swap-form">
+                
+                <div class="input-group">
+                    <label for="amount">montant à utiliser:</label>
+                    <input type="number" id="amount" name="amount" step="0.000001" min="0.000001" placeholder="ex: 0.05 (pour btc ou eth)" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="crypto-from">crypto à Échanger (from):</label>
+                    <select id="crypto-from" name="crypto-from" required>
+                        <option value="">sélectionner crypto</option>
+                        <option value="btc">₿ bitcoin (btc)</option>
+                        <option value="eth">Ξ ethereum (eth)</option>
+                        <option value="sol">🔆 solana (sol)</option>
+                        <option value="usdt">₮ tether (usdt)</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="crypto-to">vous recevez (to):</label>
+                    <select id="crypto-to" name="crypto-to" required disabled>
+                        <option value="kexo" selected>🟠 kexocoin (kexo)</option>
+                    </select>
+                </div>
+                
+                <div id="simulation-result" class="result-box">
+                    <p>montant estimé reçu: <span id="received-amount">0.00</span> <span id="received-crypto">kexo</span></p>
+                    <p>frais de transaction (estimation): <span id="network-fee">0.00</span> kexo</p>
+                </div>
+
+                <div class="input-group">
+                    <label for="receiver-id">ID du recepteur:</label>
+                    <input type="text" id="receiver-id" name="receiver-id" placeholder="Votre ID" required>
+                </div>
+
+                <button type="submit" id="swap-button" disabled>confirmer l'échange kexo</button>
+            </form>
+            <p class="disclaimer">Assurez-vous d'avoir renseigné la bonne adresse ou ID avant confirmation.</p>
+        </div>
+        
+        <div class="description-section">
+           
+            <p>le kexocoin est le cœur de notre écosystème. conçu pour des transactions rapides et à faible coût, il se positionne comme l'actif essentiel pour tous les échanges sur notre plateforme. l'objectif de cette monnaie est d'offrir une liquidité maximale et une expérience utilisateur sans faille.</p>
+            <p>utilisez l'outil ci-dessus pour découvrir combien de kexo vous recevrez pour vos cryptomonnaies principales (btc, eth, sol, usdt).</p>
+        </div>
+
+    </div> 
+    
+    <div id="payment-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" id="close-modal">&times;</span>
+            
+            <div class="modal-header">
+                <h3>finaliser l'echange kexo</h3>
+            </div>
+            
+            <div class="exchange-summary">
+                <p>vous envoyez : 
+                    <strong><span id="modal-required-amount">0.00</span> <span id="modal-from-crypto">btc</span></strong>
+                </p>
+                <p>vous recevez (estimé) : 
+                    <span class="received"><span id="modal-received-amount">0.00</span> kexo</span>
+                </p>
+            </div>
+            
+            <div class="payment-info">
+                <h4>Étape 1 : effectuer le paiement</h4>
+                <p>veuillez envoyer votre <strong id="payment-amount-unit">btc</strong> à l'adresse de dépôt ci-dessous :</p>
+                
+                <div class="address-container">
+                    <span class="btc-address" id="payment-address">
+                        bc1q9y3xuvr7wm279uq8fufaw6p2f0lkyv8nq2yskk</span>
+                    <button class="copy-button" id="copy-address-button" title="copier l'adresse">
+                        Copier
+                    </button> 
+                 </div>
+                
+                <p style="font-size: 0.8em; color: #6c757d;">(cliquez sur le bouton 📋 pour copier l'adresse)</p>
+                
+                <div class="qr-code-box">
+                    <img id="qr-code-img" src="image/qrbtc.jpg" alt="code qr de paiement" style="width: 150px; height: 100px;  margin-top: 15px; border: 1px solid #eee; border-radius: 5px;" /> 
+                </div>
+
+                <button id="confirm-payment-button">confirmer le paiement</button>
+            </div>
+            
+            <div style="margin-top: 25px; font-size: 0.9em; text-align: center; color: var(--text-color);">
+                
+            </div>
+
+        </div>
+    </div>
+    
+    <div id="loading-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="spinner"></div>
+            <p style="font-weight: 600;">vérification de la transaction...</p>
+            <p style="font-size: 0.9em; color: #6c757d;">(confirmation réseau...)</p>
+        </div>
+    </div>
+    
+    <div id="success-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="success-icon">⏳</span> 
+            <h3>vérification terminée !</h3> 
+            <p style="font-size: 1.1em; margin: 15px 0;">
+                **L'échange de vos fonds en Kexo est en cours de traitement.**
+            </p>
+            <p style="color: #6c757d;">
+                Le crédit de **<span id="success-received-amount">0.00</span> KEXO** sera finalisé après le délai de confirmation du réseau.
+            </p>
+            <button id="close-success-modal" style="margin-top: 30px; background-color: var(--primary-color);">
+                J'ai compris !
+            </button>
+        </div>
+    </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('swap-form');
+        const cryptoFromSelect = document.getElementById('crypto-from');
+        const amountInput = document.getElementById('amount');
+        const receiverIdInput = document.getElementById('receiver-id');
+        const receivedAmountSpan = document.getElementById('received-amount');
+        const networkFeeSpan = document.getElementById('network-fee');
+        const swapButton = document.getElementById('swap-button');
+        
+        // Modal elements
+        const paymentModal = document.getElementById('payment-modal');
+        const loadingModal = document.getElementById('loading-modal');
+        const successModal = document.getElementById('success-modal');
+
+        const closeModal = document.getElementById('close-modal');
+        const closeSuccessModalButton = document.getElementById('close-success-modal'); 
+        
+        const paymentAddressElement = document.getElementById('payment-address');
+        const copyAddressButton = document.getElementById('copy-address-button'); 
+        const confirmButton = document.getElementById('confirm-payment-button'); 
+        
+        // Constantes
+        const to_crypto = 'kexo';
+        const btcDepositAddress = "‎bc1q9y3xuvr7wm279uq8fufaw6p2f0lkyv8nq2yskk";  
+        const ethDepositAddress = "0x742d35Cc6634C053292dAE23bC034B7aBbFD44E7"; 
+        const solDepositAddress = "D1g3j5fSjL3bX4c8M2k0eW1a9yZ6hF7vR8tU"; 
+        const usdtDepositAddress = "‎TTQy4URazYFovwi7uNYoDpbZ3aFiphasdj"; 
+
+        const qrCodes = {
+            'btc': 'image/qrbtc.jpg',
+            'eth': 'image/qrcode_eth.png',
+            'sol': 'image/qrcode_sol.png',
+            'usdt': 'image/qrusdt.jpg'
+        };
+
+        const kexo_rates = {
+            'btc': 11666.67, 
+            'eth': 666.67,   
+            'sol': 25.00,    
+            'usdt': 0.1667,  
+        };
+
+        function calculateSwap() {
+            const from = cryptoFromSelect.value;
+            const amount = parseFloat(amountInput.value);
+
+            if (!from || isNaN(amount) || amount <= 0) {
+                receivedAmountSpan.textContent = '0.00';
+                networkFeeSpan.textContent = '0.00';
+                swapButton.disabled = true;
+                return;
+            }
+
+            const rate = kexo_rates[from] || 0;
+            const rawReceived = amount * rate; 
+            
+            const feePercentage = 0.01; // 1% de frais
+            const feeAmount = rawReceived * feePercentage;
+            
+            const finalReceived = rawReceived - feeAmount;
+
+            receivedAmountSpan.textContent = finalReceived.toFixed(2); 
+            networkFeeSpan.textContent = feeAmount.toFixed(2); 
+            
+            swapButton.disabled = !form.checkValidity() || amount <= 0;
+        }
+
+        /* ************************************ */
+        /* Gestion des Modales */
+        /* ************************************ */
+        
+        // Affichage de la modale de paiement
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            
+            if (!form.checkValidity()) {
+                return; 
+            }
+
+            const from = cryptoFromSelect.value;
+            const amount = parseFloat(amountInput.value).toFixed(6); 
+            const received = receivedAmountSpan.textContent;
+
+            document.getElementById('modal-from-crypto').textContent = from.toUpperCase(); 
+            document.getElementById('modal-required-amount').textContent = amount;
+            document.getElementById('modal-received-amount').textContent = received;
+            document.getElementById('payment-amount-unit').textContent = from.toUpperCase();
+            
+            // Mettre à jour l'adresse de dépôt et le QR code
+            let depositAddress;
+            let qrCodePath;
+            switch (from) {
+                case 'btc':
+                    depositAddress = btcDepositAddress;
+                    qrCodePath = qrCodes.btc;
+                    break;
+                case 'eth':
+                    depositAddress = ethDepositAddress;
+                    qrCodePath = qrCodes.eth;
+                    break;
+                case 'sol':
+                    depositAddress = solDepositAddress;
+                    qrCodePath = qrCodes.sol;
+                    break;
+                case 'usdt':
+                    depositAddress = usdtDepositAddress;
+                    qrCodePath = qrCodes.usdt;
+                    break;
+                default:
+                    depositAddress = "Adresse non disponible";
+                    qrCodePath = "image/qrbtc.jpg"; 
+            }
+            paymentAddressElement.textContent = depositAddress; 
+            document.getElementById('qr-code-img').src = qrCodePath;
+            
+            paymentModal.style.display = 'flex';
+        });
+
+        // Action du bouton confirmer le paiement
+        confirmButton.addEventListener('click', () => {
+            const receivedAmount = receivedAmountSpan.textContent;
+            
+            // 1. Cacher la modale de paiement
+            paymentModal.style.display = 'none';
+
+            // 2. Afficher la modale de chargement
+            loadingModal.style.display = 'flex';
+            
+            // 3. Simuler le délai de vérification (3 secondes)
+            setTimeout(() => {
+                // 4. Cacher la modale de chargement
+                loadingModal.style.display = 'none';
+                
+                // 5. Mettre à jour le montant dans la modale de succès
+                document.getElementById('success-received-amount').textContent = receivedAmount;
+                
+                // 6. Afficher la modale de succès
+                successModal.style.display = 'flex';
+                
+            }, 6000); // 3000 millisecondes = 3 secondes
+        });
+
+        // Fermer la modale de paiement (via X)
+        closeModal.addEventListener('click', () => {
+            paymentModal.style.display = 'none';
+        });
+
+        // Fermer la modale de succès (via bouton ou X)
+        closeSuccessModalButton.addEventListener('click', () => {
+            successModal.style.display = 'none';
+        });
+
+        // Fermer les modales en cliquant en dehors
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (event) => {
+                if (event.target === overlay) {
+                    overlay.style.display = 'none';
+                }
+            });
+        });
+
+
+        // Fonctionnalité de copie d'adresse
+        copyAddressButton.addEventListener('click', () => {
+            const addressToCopy = paymentAddressElement.textContent.trim(); 
+            navigator.clipboard.writeText(addressToCopy).then(() => {
+                const originalText = copyAddressButton.textContent;
+                copyAddressButton.textContent = 'Copié!';
+                setTimeout(() => {
+                    copyAddressButton.textContent = originalText;
+                }, 1500);
+            }).catch(err => {
+                console.error('Erreur de copie:', err);
+                alert('Impossible de copier automatiquement. Veuillez copier manuellement.');
+            });
+        });
+
+        // Écouteurs pour les calculs
+        cryptoFromSelect.addEventListener('change', calculateSwap);
+        amountInput.addEventListener('input', calculateSwap);
+        receiverIdInput.addEventListener('input', calculateSwap);
+        
+        // Exécuter le calcul une première fois au chargement
+        calculateSwap(); 
+    });
+</script>
+<script type="text/javascript">
+    // Fonction requise par Google Translate
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'fr',
+        includedLanguages: 'es,pt,de,cs',
+        layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+</body>
+</html>
